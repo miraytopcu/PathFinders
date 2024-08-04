@@ -1,2 +1,0 @@
-#deneme
-print("hello world")
