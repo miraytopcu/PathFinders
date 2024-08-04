@@ -1,2 +1,3 @@
 # PathFinders
-3Neoruyon
+Projeyi dair ortak repo oluşturuldu.
+Psödo kod yazıldı.
