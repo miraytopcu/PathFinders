@@ -21,7 +21,7 @@ def fetch_and_store_flight_availability(api_key, output_file):
 
     max_retries = 3
     retries = 0
-    wait_time = 5  # Initial wait time in seconds
+    wait_time = 5  # Initial wait time in seconds.
 
     while retries < max_retries:
         try:
