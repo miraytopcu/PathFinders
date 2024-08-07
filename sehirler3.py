@@ -1,6 +1,9 @@
 import json
 import math
- 
+from geopy.distance import geodesic
+
+# km çevirmede hata var (sayısal)
+
 # JSONdan data çekme
 with open('cities_of_turkey.json', 'r', encoding='utf-8') as file:
     veri = json.load(file)
@@ -13,28 +16,18 @@ def get_sehir(sehir_index):
     else:
         return "Index out of range"
     
-def get_coordinates(sehir_index):
-    # Şehrin koordinatlarını döndür
-    enlem = float(veri[sehir_index]["latitude"])
-    boylam = float(veri[sehir_index]["longitude"])
-    return enlem, boylam
+def get_enlem(sehir1, sehir2):
+    enlem1 = float(veri[sehir1]["latitude"])
+    enlem2 = float(veri[sehir2]["latitude"])
+    return (enlem1, enlem2)
 
-def haversine_distance(lat1, lon1, lat2, lon2):
-    # Convert latitude and longitude from degrees to radians
-    lat1, lon1, lat2, lon2 = map(math.radians, [lat1, lon1, lat2, lon2])
-    
-    # Haversine formula
-    dlat = lat2 - lat1
-    dlon = lon2 - lon1
-    a = math.sin(dlat / 2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2)**2
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-    
-    # Radius of Earth in kilometers
-    r = 6371.0
-    
-    # Calculate the distance
-    distance = r * c
-    return distance
+def get_boylam(sehir1, sehir2):
+    boylam1 = float(veri[sehir1]["longitude"])
+    boylam2 = float(veri[sehir2]["longitude"])
+    return (boylam1, boylam2)
+
+def vincenty_distance(coord1, coord2):
+    return geodesic(coord1, coord2).kilometers
 
 while True: 
     try:
@@ -54,11 +47,13 @@ while True:
                 sehir2 = int(sehir_indexes.split()[-1]) - 1
                 
                 # Get latitude and longitude
-                lat1, lon1 = get_coordinates(sehir1)
-                lat2, lon2 = get_coordinates(sehir2)
+                lat1, lat2 = get_enlem(sehir1, sehir2)
+                lon1, lon2 = get_boylam(sehir1, sehir2)
                 
                 # Calculate distance
-                distance = haversine_distance(lat1, lon1, lat2, lon2)
-                print(f"Uzaklık: {distance:.2f} km")
+                coord1 = (lat1 , lon1)
+                coord2 = (lat2 , lon2)
+                print("2 şehir arası km: ", vincenty_distance(coord1, coord2))
+                
     except ValueError:
-        print("Geçersiz giriş. Lütfen bir sayı giriniz.")
+        print("Geçersiz giriş. Lütfen bir sayı giriniz.")
