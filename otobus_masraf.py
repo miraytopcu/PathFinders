@@ -4,8 +4,8 @@ def otobus_masraf(distance):
     koltuk_sayisi = 40
     
     def personel_ucreti():
-        sofor = distance * 2 * 2
-        gorevli = distance * 1.5
+        sofor = distance * 1.5 * 2
+        gorevli = distance * 1
         return sofor + gorevli
     
     def ikram_servis():
@@ -14,8 +14,8 @@ def otobus_masraf(distance):
         return ikram_maliyeti + servis_maliyeti
     
     def otogar_masrafi():
-        durulan_otogar_sayisi = math.floor(distance / 100)
-        return durulan_otogar_sayisi * 550
+        durulan_otogar_sayisi = math.floor(distance / 150)
+        return durulan_otogar_sayisi * 450
     
     def bakimlar():
         yillik_kasko = 400000
@@ -32,10 +32,20 @@ def otobus_masraf(distance):
         litre = distance * 0.28
         return litre * mazot_fiyati
     
-    toplam_masraf = personel_ucreti() + ikram_servis() + otogar_masrafi() + bakimlar() + yakit_masrafi()
-    return toplam_masraf / koltuk_sayisi
+    def diger_masraflar():
+        mtv = 13500
+        aylik_kasko = 120000
+        yilda_gidilen_km = 330000
+        km_basina_kasko = (aylik_kasko * 12 ) / yilda_gidilen_km
+        sefer_basina_kasko_mtv = (distance * km_basina_kasko) + ((mtv / yilda_gidilen_km) * distance)
+        return sefer_basina_kasko_mtv
+    
+    
+    toplam_masraf = personel_ucreti() + ikram_servis() + otogar_masrafi() + bakimlar() + yakit_masrafi() + diger_masraflar()
+    amortisman = toplam_masraf
+    return (toplam_masraf + amortisman) / koltuk_sayisi
 
-print(otobus_masraf(329.84464001975505))
+print(f"yolcu bilet: {otobus_masraf(460.9404070832664)}")
 
 
 """

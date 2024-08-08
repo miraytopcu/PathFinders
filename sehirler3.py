@@ -31,29 +31,28 @@ def vincenty_distance(coord1, coord2):
 
 while True: 
     try:
-        print("1- Şehir Bulma \n2 - Uzaklık Hesaplama")
-        cikis = input("Çıkmak istiyorsan 'q' tuşla: ")
-        if cikis == "q":
+        print("1- Şehir Bulma \n2 - Uzaklık Hesaplama \n3- Çıkış(q)")
+        tercih = input("Tercihini tuşla: ")
+        
+        if tercih == "q":
             break
-        else:
-            tercih = input("Tercihini tuşla: ")
-            if tercih == "1":
-                sehir_index = int(input("Şehir plakasını giriniz: ")) - 1
-                result = get_sehir(sehir_index)
-                print("Şehir adı:", result)
-            elif tercih == "2":
-                sehir_indexes = input("İki il plakasını arada boşluk bırakarak gir: ")
-                sehir1 = int(sehir_indexes.split()[0]) - 1
-                sehir2 = int(sehir_indexes.split()[-1]) - 1
+        elif tercih == "1":
+            sehir_index = int(input("Şehir plakasını giriniz: ")) - 1
+            result = get_sehir(sehir_index)
+            print("Şehir adı:", result)
+        elif tercih == "2":
+            sehir_indexes = input("İki il plakasını arada boşluk bırakarak gir: ")
+            sehir1 = int(sehir_indexes.split()[0]) - 1
+            sehir2 = int(sehir_indexes.split()[-1]) - 1
                 
-                # Get latitude and longitude
-                lat1, lat2 = get_enlem(sehir1, sehir2)
-                lon1, lon2 = get_boylam(sehir1, sehir2)
+            # Get latitude and longitude
+            lat1, lat2 = get_enlem(sehir1, sehir2)
+            lon1, lon2 = get_boylam(sehir1, sehir2)
                 
-                # Calculate distance
-                coord1 = (lat1 , lon1)
-                coord2 = (lat2 , lon2)
-                print("2 şehir arası km: ", vincenty_distance(coord1, coord2))
+            # Calculate distance
+            coord1 = (lat1 , lon1)
+            coord2 = (lat2 , lon2)
+            print("2 şehir arası km: ", vincenty_distance(coord1, coord2))
                 
     except ValueError:
         print("Geçersiz giriş. Lütfen bir sayı giriniz.")
