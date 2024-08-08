@@ -98,7 +98,7 @@ while True:
         elif tercih == "1":
             sehir_index = int(input("Şehir plakasını giriniz: ")) - 1
             result = get_sehir(sehir_index)
-            print("Şehir adı:", result)
+            print("Şehir adı:", result , "\n")
         elif tercih == "2":
             sehir_indexes = input("İki il plakasını arada boşluk bırakarak gir: ")
             sehir1 = int(sehir_indexes.split()[0]) - 1
@@ -111,7 +111,7 @@ while True:
             # Calculate distance
             coord1 = (lat1 , lon1)
             coord2 = (lat2 , lon2)
-            print("2 şehir arası km: ", vincenty_distance(coord1, coord2))
+            print("2 şehir arası km: ", vincenty_distance(coord1, coord2) , "\n")
         elif tercih == "3":
             sehir_indexes = input("İki il plakasını arada boşluk bırakarak gir: ")
             sehir1 = int(sehir_indexes.split()[0]) - 1
@@ -124,8 +124,8 @@ while True:
             # Calculate distance
             coord1 = (lat1 , lon1)
             coord2 = (lat2 , lon2)
-            print(f"bilet ücreti: {otobus_masraf(vincenty_distance(coord1, coord2))}")
+            print(f"bilet ücreti: {otobus_masraf(vincenty_distance(coord1, coord2))} \n")
             
                 
     except ValueError:
-        print("Geçersiz giriş. Lütfen bir sayı giriniz.")
+        print("Geçersiz giriş. Lütfen bir sayı giriniz.\n")
