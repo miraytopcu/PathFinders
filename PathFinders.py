@@ -6,21 +6,19 @@ from selenium.webdriver.chrome.options import Options
 from time import sleep
 
 class Ulasim:
-    def __init__(self):
+    def __init__(self, from_city, to_city):
         self.sehirler = []  # Şehir listesini tutmak için boş bir liste oluşturduk
+        self.from_city = from_city
+        self.to_city = to_city
 
-    @staticmethod
-    def distance():
+    # @staticmethod
+    def distance(self):
         # JSON dosyasından verileri çekme
         with open('cities_of_turkey.json', 'r', encoding='utf-8') as file:
             veri = json.load(file)
 
-        # Kullanıcıdan şehir isimlerini alıp işleme
-        input_str = input("İki şehir arasında boşluk bırakarak isimleri girin: ")
-        sehirler = input_str.split()
-
         # Şehir isimlerini büyük harfle başlayıp kalanı küçük olacak şekilde düzenleme
-        sehirler = [sehir.capitalize() for sehir in sehirler]
+        sehirler = [self.from_city.capitalize() , self.to_city.capitalize()]
         lats = []   # Girilen inputtaki şehrin enlem bilgisi
         longs = []  # Girilen inputtaki şehrin boylam bilgisi
         for sehir in sehirler:
@@ -117,9 +115,7 @@ class Ulasim:
             veri = json.load(file)
 
         # Kullanıcının girdiği şehir isimlerini al
-        input_str = input("İki şehir arasında boşluk bırakarak isimleri girin: ")
-        sehirler = input_str.split()
-        sehirler = [sehir.capitalize() for sehir in sehirler]
+        sehirler = [self.from_city.capitalize() , self.to_city.capitalize()]
 
         # Ensure cities and regions data is loaded
         if not self.sehirler or not self.sehir_regionleri:
@@ -147,11 +143,12 @@ class Ulasim:
                         havaalani_var = True
                         distance = self.distance()  # Mesafeyi hesapla
                         ucak_bileti = math.ceil(distance * 3)  # km başına 3 TL
+                        return ucak_bileti
                     else:
                         print(f"{sehir} adlı şehirde havaalanı bulunmamaktadır!")
                         bolge = self.sehir_regionleri.get(sehir, "Bilinmeyen Bölge")
                         sehir_bolge = regions.get(bolge, "Bilinmeyen Bölge")
-                        print(f"Bu şehirden kalkan uçak yok, {sehir_bolge} şehrinden uçağa binebilirsiniz.")
+                        return f"Bu şehirden kalkan uçak yok, {sehir_bolge} şehrinden uçağa binebilirsiniz."
                     found = True
                     break
             if not found:
@@ -160,15 +157,26 @@ class Ulasim:
         if not havaalani_var:
             print("Belirtilen şehirlerde havaalanı bulunmamaktadır.")
 
-        return ucak_bileti  # Return the calculated ucak_bileti value
+        # return ucak_bileti  # Return the calculated ucak_bileti value
 
-
+tofrom = input("Sırasıyla çıkmak ve gitmek istediğiniz illeri arada boşluk karakteri kullanarak giriniz: ")
+tofromx = tofrom.split()
+to_city = tofromx[0]
+from_city = tofromx[1]
 # Ulasim sınıfından bir örnek oluşturalım
-deneme1 = Ulasim()
+deneme1 = Ulasim(from_city, to_city)
 
-# distance metodunu çağıralım
-bilet_fiyati = deneme1.otobus()
-ucak_bileti = deneme1.ucak()
-print(f"Bilet fiyatı: {bilet_fiyati}")
-print(f"Bilet fiyatı: {ucak_bileti}")
+ulasim_tercih = input("Otobüsle yolculuk yapmak istiyorsanız 'o' uçakla yolculuk yapmak istiyorsanız 'u' tuşlayınız: ")
+if ulasim_tercih == "o":
+    # invoke otobus
+    bilet_fiyati = deneme1.otobus()
+    print(f"Bilet fiyatı: {bilet_fiyati}")
+elif ulasim_tercih == "u":
+    # invoke ucak
+    ucak_bileti = deneme1.ucak()
+    print(f"Bilet fiyatı: {ucak_bileti}")
+
+
+
+
 
