@@ -20,13 +20,13 @@ def pathFinders():
     
     if islem == '1':
         print("\nSeçtiniz: Tatil yapmak istediğim şehir kesin")
-        # Bu seçeneğe göre yapılacak işlemleri burada tanımlanacak.
+        # Bu seçeneğe göre yapılacak işlemler burada tanımlanacak.
     elif islem == '2':
         print("\nSeçtiniz: Bir kategoriye göre tatil yapmak istiyorum")
-        # Bu seçeneğe göre yapılacak işlemleri burada tanımlanacak.
+        # Bu seçeneğe göre yapılacak işlemler burada tanımlanacak.
     elif islem == '3':
         print("\nSeçtiniz: Şu kadar bütçem var, nerede tatil yapabilirim?")
-        # Bu seçeneğe göre yapılacak işlemleri burada tanımlanacak.
+        # Bu seçeneğe göre yapılacak işlemler burada tanımlanacak.
     else:
         print("\nGeçersiz seçim. Lütfen tekrar deneyin.")
 
