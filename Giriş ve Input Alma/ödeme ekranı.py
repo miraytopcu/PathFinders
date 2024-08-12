@@ -9,7 +9,7 @@ def odemeEkrani():
     # Ödeme türü seçimi
     odeme = input("\nSeçiminizi yapın (1, 2, 3 veya 4): ")
 
-    # Toplam tutar kullanıcıdan alınabilir veya önceden belirlenmiş olabilir.
+    # Toplam tutar tatil planları kodu yazıldıktan sonra oradan çekilebilir.
     toplam_tutar = float(input("Toplam tutar (TL): "))
 
     if odeme == '1':
