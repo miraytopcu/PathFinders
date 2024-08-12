@@ -9,23 +9,23 @@ class Ulasim:
     def __init__(self):
         self.sehirler = []  # Şehir listesini tutmak için boş bir liste oluşturduk
 
-    # @staticmethod
+    @staticmethod
     def distance():
         # JSON dosyasından verileri çekme
         with open('cities_of_turkey.json', 'r', encoding='utf-8') as file:
             veri = json.load(file)
 
-        # Kullanıcıdan şehir isimlerini alıp işleyeceğiz
+        # Kullanıcıdan şehir isimlerini alıp işleme
         input_str = input("İki şehir arasında boşluk bırakarak isimleri girin: ")
         sehirler = input_str.split()
 
-        # Şehir isimlerini büyük harfle başlayacak şekilde düzenleyelim
+        # Şehir isimlerini büyük harfle başlayıp kalanı küçük olacak şekilde düzenleme
         sehirler = [sehir.capitalize() for sehir in sehirler]
-        lats = []
-        longs = []
+        lats = []   # Girilen inputtaki şehrin enlem bilgisi
+        longs = []  # Girilen inputtaki şehrin boylam bilgisi
         for sehir in sehirler:
             if sehir.startswith("I"):
-                sehir = sehir.replace("I", "İ")
+                sehir = sehir.replace("I", "İ")    # izmir - Izmir değil İzmir olsun
             found = False
             for data in veri:
                 if data["name"] == sehir:
@@ -38,10 +38,10 @@ class Ulasim:
             if not found:
                 print(f"{sehir} adlı şehir veri setinde bulunamadı.")
         
-        if len(lats) >= 2 and len(longs) >= 2:
+        if len(lats) >= 2 and len(longs) >= 2:        # Listede en az iki şehir olduğunu kontrol etmek için
             coord1 = (lats[0], longs[0])
             coord2 = (lats[1], longs[1])
-            return int(geodesic(coord1, coord2).kilometers)
+            return int(geodesic(coord1, coord2).kilometers)    # Geodesic kütüphanesi iki koordinat arası mesafeyi hesaplar
         else:
             return "İki şehir arasında mesafe hesaplanamadı."
 
@@ -50,7 +50,7 @@ class Ulasim:
         koltuk_sayisi = 40
 
         def personel_ucreti():
-            sofor = distance * 1.5 * 2
+            sofor = distance * 1.5 * 2     # 2 sofor var, km başı 1.5 tl
             gorevli = distance * 1
             return sofor + gorevli
 
@@ -60,7 +60,7 @@ class Ulasim:
             return ikram_maliyeti + servis_maliyeti
 
         def otogar_masrafi():
-            durulan_otogar_sayisi = math.floor(distance / 150)
+            durulan_otogar_sayisi = math.floor(distance / 150)     # 150 kmde bir otogarda duruyor ve her durduğu otogarda 450 harcıyor
             return durulan_otogar_sayisi * 450
 
         def bakimlar():
@@ -73,13 +73,13 @@ class Ulasim:
             sefer_basi_bakim_masrafi = km_basina_bakim_masraflari * distance
             return sefer_basi_bakim_masrafi
 
-        def yakit_masrafi():
+        def yakit_masrafi():       # Mazot fiyatları sürekli güncellendiği için seleniumdan xpath kullanarak veriyi aldık
             chromeOptions = Options()
             chromeOptions.add_argument("--incognito")
             chromeOptions.add_argument("--headless")
             driver = webdriver.Chrome(options=chromeOptions)
             driver.get("https://www.aytemiz.com.tr/akaryakit-fiyatlari/motorin-fiyatlari")
-            driver.implicitly_wait(5)
+            driver.implicitly_wait(5)     # sitenin açılması için bekleme süresi
 
             try:
                 fiyat_bilgisi = driver.find_element("xpath", '//*[@id="fuel-price-table"]/tbody/tr[6]/td[3]').text
@@ -92,7 +92,7 @@ class Ulasim:
             driver.quit()  
 
         def diger_masraflar():
-            mtv = 13500
+            mtv = 13500     # motorlu taşıtlar vergisi 
             aylik_kasko = 120000
             yilda_gidilen_km = 330000
             km_basina_kasko = (aylik_kasko * 12 ) / yilda_gidilen_km
@@ -100,42 +100,75 @@ class Ulasim:
             return sefer_basina_kasko_mtv
         
         toplam_masraf = personel_ucreti() + ikram_servis() + otogar_masrafi() + bakimlar() + yakit_masrafi() + diger_masraflar()
-        amortisman = toplam_masraf
+        amortisman = toplam_masraf     # kaarda amortisman içinde
         return (toplam_masraf + amortisman) / koltuk_sayisi
+    
+    def load_cities_and_regions(self):
+        # Load cities and regions from the JSON file
+        with open('cities_of_turkey.json', 'r', encoding='utf-8') as file:
+            veri = json.load(file)
+        
+        self.sehirler = [data["name"] for data in veri]
+        self.sehir_regionleri = {data["name"]: data["region"] for data in veri}
     
     def ucak(self):
         # JSON dosyasından verileri çekme
         with open('cities_of_turkey.json', 'r', encoding='utf-8') as file:
             veri = json.load(file)
-        distance = self.distance()
-        regions = {"Ege" : "İzmir",
-               "Akdeniz" : "Antalya",
-               "Güneydoğu Anadolu" : "Gaziantep",
-               "İç Anadolu" : "Ankara",
-               "Doğu Anadolu" : "Malatya",
-               "Marmara" : "İstanbul",
-               "Karadeniz" : "Samsun"}
-        # km başına 3 tl
-        ucak_bileti = math.ceil(distance * 3)
-        for sehir in self.sehirler:
+
+        # Kullanıcının girdiği şehir isimlerini al
+        input_str = input("İki şehir arasında boşluk bırakarak isimleri girin: ")
+        sehirler = input_str.split()
+        sehirler = [sehir.capitalize() for sehir in sehirler]
+
+        # Ensure cities and regions data is loaded
+        if not self.sehirler or not self.sehir_regionleri:
+            self.load_cities_and_regions()
+
+        # Bölgeler
+        regions = {
+            "Ege": "İzmir",
+            "Akdeniz": "Antalya",
+            "Güneydoğu Anadolu": "Gaziantep",
+            "İç Anadolu": "Ankara",
+            "Doğu Anadolu": "Malatya",
+            "Marmara": "İstanbul",
+            "Karadeniz": "Samsun"
+        }
+
+        havaalani_var = False
+        ucak_bileti = 0
+
+        for sehir in sehirler:
+            found = False
             for data in veri:
                 if data["name"] == sehir:
                     if data["havaalani"] == "+":
-                        continue
+                        havaalani_var = True
+                        distance = self.distance()  # Mesafeyi hesapla
+                        ucak_bileti = math.ceil(distance * 3)  # km başına 3 TL
                     else:
                         print(f"{sehir} adlı şehirde havaalanı bulunmamaktadır!")
-                        bolge = veri[sehir]["region"]
-                        sehir_bolge = regions.get(bolge)
+                        bolge = self.sehir_regionleri.get(sehir, "Bilinmeyen Bölge")
+                        sehir_bolge = regions.get(bolge, "Bilinmeyen Bölge")
                         print(f"Bu şehirden kalkan uçak yok, {sehir_bolge} şehrinden uçağa binebilirsiniz.")
+                    found = True
                     break
-        
+            if not found:
+                print(f"{sehir} adlı şehir veri setinde bulunamadı.")
+
+        if not havaalani_var:
+            print("Belirtilen şehirlerde havaalanı bulunmamaktadır.")
+
+        return ucak_bileti  # Return the calculated ucak_bileti value
+
 
 # Ulasim sınıfından bir örnek oluşturalım
 deneme1 = Ulasim()
 
 # distance metodunu çağıralım
-mesafe = deneme1.distance()
 bilet_fiyati = deneme1.otobus()
-print(f"Aralarındaki mesafe: {mesafe} km")
+ucak_bileti = deneme1.ucak()
 print(f"Bilet fiyatı: {bilet_fiyati}")
+print(f"Bilet fiyatı: {ucak_bileti}")
 
