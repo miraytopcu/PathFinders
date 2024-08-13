@@ -242,4 +242,3 @@ elif ulasim_tercih == "u":
     # invoke ucak
     ucak_bileti = deneme1.ucak()
     print(ucak_bileti)
-
