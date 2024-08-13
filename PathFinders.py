@@ -4,7 +4,9 @@ from geopy.distance import geodesic
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from time import sleep
+import random
 
+# ---------------------------------------------------------------------------------------------------------------
 class Ulasim:
     def __init__(self, from_city, to_city):
         self.sehirler = []  # Şehir listesini tutmak için boş bir liste oluşturduk
@@ -45,6 +47,8 @@ class Ulasim:
             return int(geodesic(coord1, coord2).kilometers)    # Geodesic kütüphanesi iki koordinat arası mesafeyi hesaplar
         else:
             return "İki şehir arasında mesafe hesaplanamadı."
+
+# -------------------------------------------------------------------------------------------------------------
 
     def otobus(self):
         distance = self.distance()
@@ -104,6 +108,8 @@ class Ulasim:
         amortisman = toplam_masraf     # kaarda amortisman içinde
         return int((toplam_masraf + amortisman) / koltuk_sayisi)
     
+# --------------------------------------------------------------------------------------------------------------
+    
     def load_cities_and_regions(self):
         # Load cities and regions from the JSON file
         with open('cities_of_turkey.json', 'r', encoding='utf-8') as file:
@@ -151,7 +157,33 @@ class Ulasim:
             if data["name"] == sehirler[1]:
                 hava2 = data["havaalani"]
 
-        if hava1 == "+" and hava2 == "+":
+        if hava1 == "-" and hava2 == "-":
+            bolge1 = self.sehir_regionleri.get(sehirler[0], "Bilinmeyen Bölge")
+            sehir_bolge1 = regions.get(bolge1, "Bilinmeyen Bölge")
+            bolge2 = self.sehir_regionleri.get(sehirler[1], "Bilinmeyen Bölge")
+            sehir_bolge2 = regions.get(bolge2, "Bilinmeyen Bölge")
+            print(f"{sehirler[0]} adlı şehirde havaalanı bulunmamaktadır! {sehir_bolge1} şehrinden uçağa binebilirsiniz.")
+            print(f"{sehirler[1]} adlı şehirde havaalanı bulunmamaktadır! {sehir_bolge2} şehrinden uçağa binebilirsiniz.")
+            secim = input(f"Aktarmalı gitmek isterseniz 'e', yolculuğu otobüsle yapmak isterseniz 'h' tuşlayınız: ")
+            if secim == "h":
+                otobus_fiyat = self.otobus()
+                return otobus_fiyat
+            elif secim == "e":
+                self.from_city = sehirler[0]
+                self.to_city = sehir_bolge1
+                otobus_fiyat1 = self.otobus()
+                self.from_city = sehir_bolge1
+                self.to_city = sehir_bolge2
+                distance = self.distance()
+                ucak_fiyat = math.ceil(distance * 3)
+                self.from_city = sehir_bolge2
+                self.to_city = sehirler[1]
+                otobus_fiyat2 = self.otobus()
+                return otobus_fiyat1 + ucak_fiyat + otobus_fiyat2
+            else:
+                return f"Tercihini gözden geçir!"
+
+        elif hava1 == "+" and hava2 == "+":
             distance = self.distance()  # Mesafeyi hesapla
             ucak_bileti = math.ceil(distance * 3)  # km başına 3 TL
             return ucak_bileti
@@ -195,51 +227,142 @@ class Ulasim:
                 return otobus_fiyat + ucak_fiyat
             else:
                 return f"Tercihini gözden geçir!"
-            
-        elif hava1 == "-" and hava2 == "-":
-            bolge1 = self.sehir_regionleri.get(sehirler[0], "Bilinmeyen Bölge")
-            sehir_bolge1 = regions.get(bolge1, "Bilinmeyen Bölge")
-            bolge2 = self.sehir_regionleri.get(sehirler[1], "Bilinmeyen Bölge")
-            sehir_bolge2 = regions.get(bolge2, "Bilinmeyen Bölge")
-            print(f"{sehirler[0]} adlı şehirde havaalanı bulunmamaktadır! {sehir_bolge1} şehrinden uçağa binebilirsiniz.")
-            print(f"{sehirler[1]} adlı şehirde havaalanı bulunmamaktadır! {sehir_bolge2} şehrinden uçağa binebilirsiniz.")
-            secim = input(f"Aktarmalı gitmek isterseniz 'e', yolculuğu otobüsle yapmak isterseniz 'h' tuşlayınız: ")
-            if secim == "h":
-                otobus_fiyat = self.otobus()
-                return otobus_fiyat
-            elif secim == "e":
-                self.from_city = sehirler[0]
-                self.to_city = sehir_bolge1
-                otobus_fiyat1 = self.otobus()
-                self.from_city = sehir_bolge1
-                self.to_city = sehir_bolge2
-                distance = self.distance()
-                ucak_fiyat = math.ceil(distance * 3)
-                self.from_city = sehir_bolge
-                self.to_city = sehirler[1]
-                otobus_fiyat2 = self.otobus()
-                return otobus_fiyat1 + ucak_fiyat + otobus_fiyat2
-            else:
-                return f"Tercihini gözden geçir!"
-            
+               
         else:
             return f"Tercihini gözden geçir!!!"
         
+# ------------------------------------------------------------------------------------------------------
+class Otel:
+    pass
 
-tofrom = input("Sırasıyla çıkmak ve gitmek istediğiniz illeri arada boşluk karakteri kullanarak giriniz: ")
-tofromx = tofrom.split()
-to_city = tofromx[0]
-from_city = tofromx[1]
-# Ulasim sınıfından bir örnek oluşturalım
-deneme1 = Ulasim(from_city, to_city)
+# ---------------------------------------------------------------------------------------------------------
 
-ulasim_tercih = input("Otobüsle yolculuk yapmak istiyorsanız 'o' uçakla yolculuk yapmak istiyorsanız 'u' tuşlayınız: ")
-if ulasim_tercih == "o":
-    # invoke otobus
-    bilet_fiyati = deneme1.otobus()
-    print(f"Bilet fiyatı: {bilet_fiyati}")
-elif ulasim_tercih == "u":
-    # invoke ucak
-    ucak_bileti = deneme1.ucak()
-    print(ucak_bileti)
+def odeme_yap():
+    hizmet_bedeli = 200
+    def kampanya():
+        with open('cities_of_turkey.json', 'r', encoding='utf-8') as file:
+            veri = json.load(file)
+
+        sehirler_listesi = []
+        for data in veri:
+            sehirler_listesi.append(data["name"])
+
+        rastgele_sehirler = random.sample(sehirler_listesi, 15)
+        # print(f"Rastgele belirlenen şehirler: {', '.join(rastgele_sehirler)}")
+
+        # Kullanıcıdan şehir girmesini iste!!!
+        kullanici_sehri = "Adana"
+
+        # Kullanıcı şehri rastgele belirlenen şehirler arasında mı kontrol et
+        if kullanici_sehri in rastgele_sehirler:
+            print(f"{kullanici_sehri} seçildiği için %15 indirim uygulanacak!")
+            indirimli_fiyat = hizmet_bedeli * 0.85
+            # print(f"İndirimli toplam fiyat: {indirimli_fiyat:.2f} TL")
+            return indirimli_fiyat
+        else:
+            print(f"{kullanici_sehri} kampanyalı şehirler arasında değil, indirim uygulanmayacak.")
+            return hizmet_bedeli
+    return kampanya()
+# ------------------------------------------------------------------------------------------------------
+        
+ad_soyad = input("Adınız Soyadınız: ")
+# Kullanıcıyı karşılama mesajı
+print(f"\nMerhaba {ad_soyad}, PathFinders'a hoş geldiniz!")
+print(f"Size uygun tatil önerileri sunacağız.\n")
+
+num_person = int(input("Katılacak kişi sayısını giriniz: "))
+num_day = int(input("Kalınacak gece sayısını giriniz: "))
+rehber = input("Rehber hizmeti istiyorsanız 'e' istemiyorsanız 'h' tuşlayınız: ")
+
+if rehber == "e":
+    rehber_fiyat = 500
+else:
+    rehber_fiyat = 0
+# İşlem türü seçimi
+print("Lütfen yapmak istediğiniz işlemi seçin:")
+print("1) Tatil yapmak istediğim şehri ben seçmek istiyorum.")
+print("2) Bir kategoriye göre tatil yapmak istiyorum (Kültürel, Lezzet, Deniz, Doğa)")
+islem = input("\nSeçiminizi yapın (1, 2): ")
+
+# -------------------------------------------------------------------------------------------------------------
+
+if islem == '1':
+    print("\nSeçtiniz: Tatil yapmak istediğim şehri ben seçmek istiyorum.")
+    # Bu seçeneğe göre yapılacak işlemler burada tanımlanacak.
+    tofrom = input("Sırasıyla çıkmak ve gitmek istediğiniz illeri arada boşluk karakteri kullanarak giriniz: ")
+    tofromx = tofrom.split()
+    to_city = tofromx[0]
+    from_city = tofromx[1]
+    deneme1 = Ulasim(from_city, to_city)
+    ulasim_tercih = input("Otobüsle yolculuk yapmak istiyorsanız 'o' uçakla yolculuk yapmak istiyorsanız 'u' tuşlayınız: ")
+    if ulasim_tercih == "o":
+        # invoke otobus
+        bilet_fiyati = deneme1.otobus()
+    elif ulasim_tercih == "u":
+        # invoke ucak
+        bilet_fiyati = deneme1.ucak()
+    print(f"Bilet Fiyatı: {bilet_fiyati}")
+    # otel vs    
+
+elif islem == '2':
+    print("\nSeçtiniz: Bir kategoriye göre tatil yapmak istiyorum")
+    # Bu seçeneğe göre yapılacak işlemler burada tanımlanacak.
+    print("Lütfen seyahat türünüzü seçin:")
+    print("1. Deniz Tatili")
+    print("2. Lezzet Turu")
+    print("3. Kültürel Gezi")
+    print("4. Doğa")
+
+    secim = input("Seçiminizi girin (1-4): ")
+
+    if secim == '1':
+        pass
+    elif secim == '2':
+        pass
+    elif secim == '3':
+        pass
+    elif secim == '4':
+        pass
+    else:
+        print("Geçersiz seçim! Lütfen tekrar deneyin.")
+
+else:
+    print("\nGeçersiz seçim. Lütfen tekrar deneyin.")
+
+# ------------------------------------------------------------------------------------------------------------
+
+# Kullanıcıya ödeme seçeneklerini sunma
+print("Lütfen ödeme yöntemini seçin:")
+print("1) Kredi Kartı (%2 komisyonlu)")
+print("2) Banka Kartı")
+print("3) Nakit Ödeme")
+print("4) Havale ile Ödeme (%5 indirimli)")
+
+# Ödeme türü seçimi
+odeme = input("\nSeçiminizi yapın (1, 2, 3 veya 4): ")
+
+# Toplam tutar tatil planları kodu yazıldıktan sonra oradan çekilebilir.
+toplam_tutar = (bilet_fiyati * num_person) + int(odeme_yap()) + rehber_fiyat  # + otel 
+
+if odeme == '1':
+    komisyon_orani = 0.02
+    komisyonlu_tutar = toplam_tutar * (1 + komisyon_orani)
+    print(f"\nSeçtiniz: Kredi Kartı ile Ödeme")
+    print(f"Ödenecek Tutar (komisyonlu): {komisyonlu_tutar:.2f} TL")
+        
+elif odeme == '2':
+    print(f"\nSeçtiniz: Banka Kartı ile Ödeme")
+    print(f"Ödenecek Tutar: {toplam_tutar:.2f} TL")
+        
+elif odeme == '3':
+    print(f"\nSeçtiniz: Nakit Ödeme")
+    print(f"Ödenecek Tutar: {toplam_tutar:.2f} TL")
+        
+elif odeme == '4':
+    indirimli_tutar = toplam_tutar * 0.95
+    print(f"\nSeçtiniz: Havale ile Ödeme")
+    print(f"Ödenecek Tutar (indirimli): {indirimli_tutar:.2f} TL")
+        
+else:
+    print("\nGeçersiz seçim. Lütfen tekrar deneyin.")
 
