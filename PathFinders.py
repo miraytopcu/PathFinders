@@ -241,6 +241,9 @@ class Otel:
         self.location = location
     
     def hotels(self):
+        if self.location is None:
+            print("Location is not specified.")
+            return
         # Excel dosyasının yolunu belirtin
         dosya_yolu = 'PathFinders_oteller.xlsx'
 
