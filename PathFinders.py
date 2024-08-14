@@ -22,14 +22,17 @@ class Ulasim:
 
         # Şehir isimlerini büyük harfle başlayıp kalanı küçük olacak şekilde düzenleme
         sehirler = [self.from_city.capitalize() , self.to_city.capitalize()]
+        if sehirler[0] == "Istanbul":
+            sehirler[0] = sehirler[0].replace("I", "İ")
+        elif sehirler[1] == "Istanbul":
+            sehirler[1] = sehirler[1].replace("I", "İ")
+        elif sehirler[0] == "Izmir":
+            sehirler[0] = sehirler[0].replace("I", "İ")
+        elif sehirler[1] == "Izmir":
+            sehirler[1] = sehirler[1].replace("I", "İ")
         lats = []   # Girilen inputtaki şehrin enlem bilgisi
         longs = []  # Girilen inputtaki şehrin boylam bilgisi
         for sehir in sehirler:
-            # güncelle İğdır
-            if sehir == "Istanbul":
-                sehir = sehir.replace("I", "İ")
-            elif sehir == "Izmir":
-                sehir = sehir.replace("I", "İ")    # izmir - Izmir değil İzmir olsun
             found = False
             for data in veri:
                 if data["name"] == sehir:
@@ -125,7 +128,7 @@ class Ulasim:
             veri = json.load(file)
 
         # Kullanıcının girdiği şehir isimlerini al
-        sehirler = [self.to_city.capitalize() , self.from_city.capitalize()]
+        sehirler = [self.from_city.capitalize() , self.to_city.capitalize()]
         if sehirler[0] == "Istanbul":
             sehirler[0] = sehirler[0].replace("I", "İ")
         elif sehirler[1] == "Istanbul":
@@ -234,136 +237,286 @@ class Ulasim:
         
 # ------------------------------------------------------------------------------------------------------
 class Otel:
-    pass
+    def __init__(self, location):
+        self.location = location
+    
+    def hotels(self):
+        # Excel dosyasının yolunu belirtin
+        dosya_yolu = 'PathFinders_oteller.xlsx'
+
+        # Excel dosyasını ve sayfasını yükleyin
+        kitap = openpyxl.load_workbook(dosya_yolu)
+        sayfa = kitap.active  # Aktif sayfa seçili hale gelir
+
+        self.location = self.location.capitalize()
+        if self.location == "Istanbul":
+            self.location = self.location.replace("I", "İ")
+        elif self.location == "Izmir":
+            self.location = self.location.replace("I", "İ")
+
+        # Şehir için uygun otelleri ve fiyatlarını depolamak için liste oluşturun
+        oteller = []
+
+        # Satır sayısını belirleyin
+        satir_sayisi = sayfa.max_row
+
+        # Verileri çekmek için bir döngü yazın
+        for i in range(2, satir_sayisi + 1):  # Satırlar arasında döngü (başlık satırı atlanarak)
+            sehir = sayfa.cell(i, 2).value  # 2. sütundaki şehir ismini al
+            
+            # Şehir eşleşiyorsa otelleri al
+            if sehir.lower() == self.location.lower():
+                for j in range(3, 6):  # 3. sütundan 5. sütuna kadar oteller
+                    otel = sayfa.cell(i, j).value  # Otel ismini al
+                    fiyat = sayfa.cell(i, j + 3).value  # Aynı otelin fiyatını al (3 sütun sonrası)
+                    
+                    # Otel ve fiyatı listeye ekle
+                    oteller.append((otel, fiyat))
+                
+                # Kamp alanı ve fiyatını al
+                kamp_alani = sayfa.cell(i, 9).value  # 9. sütundaki kamp alanı ismini al
+                kamp_fiyati = sayfa.cell(i, 10).value  # 10. sütundaki kamp fiyatını al
+                
+                # Kamp alanını da listeye ekle
+                oteller.append((kamp_alani, kamp_fiyati))  # Kamp alanları için adres ve telefon yoksa boş bırakın
+            
+            # İlgili şehir için 3 otel ve 1 kamp alanı bulduysak döngüden çık
+            if len(oteller) >= 4:
+                break
+
+        # Şehir için otel ve kamp seçenekleri bulunduğunda sonucu yazdır
+        if oteller:
+            print(f"{self.location} için mevcut otel ve kamp seçenekleri:")
+            for idx, (otel, fiyat) in enumerate(oteller[:4], start=1):  # İlk 3 otel ve 1 kamp alanını yazdır
+                print(f"{idx}. seçenek: Otel/Kamp: {otel} \nFiyat: {fiyat} TL")
+            
+            # Kullanıcıdan seçim yapmasını iste
+            while True:
+                try:
+                    secim = int(input("Hangi oteli/kampı seçmek istersiniz (1-4): "))
+                    if 1 <= secim <= len(oteller[:4]):
+                        secili_otel, secili_fiyat = oteller[secim - 1]
+                        # secili_fiyat değerini sayıya dönüştürün
+                        secili_fiyat = float(secili_fiyat)  # Eğer fiyatlar tamsayı ise int() kullanın
+                        print(f"Seçtiğiniz Otel/kamp: {secili_otel} \nFiyat: {secili_fiyat} TL")
+                        
+                        return secili_fiyat
+                    else:
+                        print("Lütfen 1 ile 4 arasında bir sayı girin.")
+                except ValueError:
+                    print("Lütfen geçerli bir sayı girin.")
+        else:
+            print(f"{self.location} için mevcut otel/kamp bulunamadı.")
 
 # ---------------------------------------------------------------------------------------------------------
 
-def odeme_yap():
+def kampanya(location):
     hizmet_bedeli = 200
-    def kampanya():
+
+    with open('cities_of_turkey.json', 'r', encoding='utf-8') as file:
+        veri = json.load(file)
+
+    sehirler_listesi = []
+    for data in veri:
+        sehirler_listesi.append(data["name"])
+
+    rastgele_sehirler = random.sample(sehirler_listesi, 15)
+    # print(f"Rastgele belirlenen şehirler: {', '.join(rastgele_sehirler)}")
+
+    # Kullanıcı şehri rastgele belirlenen şehirler arasında mı kontrol et
+    if location in rastgele_sehirler:
+        print(f"{location} seçildiği için %15 indirim uygulanacak!")
+        indirimli_fiyat = hizmet_bedeli * 0.85
+        # print(f"İndirimli toplam fiyat: {indirimli_fiyat:.2f} TL")
+        return indirimli_fiyat
+    else:
+        print(f"{location} kampanyalı şehirler arasında değil, indirim uygulanmayacak.")
+        return hizmet_bedeli
+
+# ------------------------------------------------------------------------------------------------------
+
+while True:        
+    ad_soyad = input("Adınız Soyadınız: ")
+    # Kullanıcıyı karşılama mesajı
+    print(f"\nMerhaba {ad_soyad}, PathFinders'a hoş geldiniz!")
+    print(f"Size uygun tatil önerileri sunacağız.\n")
+
+    num_person = int(input("Katılacak kişi sayısını giriniz: "))
+    num_day = int(input("Kalınacak gece sayısını giriniz: "))
+    max_butce = float(input("Tatil için ayırabileceğiniz max bütçeyi giriniz: "))
+    rehber = input("Rehber hizmeti istiyorsanız 'e' istemiyorsanız 'h' tuşlayınız: ")
+
+    if rehber == "e":
+        rehber_fiyat = 500
+    else:
+        rehber_fiyat = 0
+    # İşlem türü seçimi
+    print("Lütfen yapmak istediğiniz işlemi seçin:")
+    print("1) Tatil yapmak istediğim şehri ben seçmek istiyorum.")
+    print("2) Bir kategoriye göre tatil yapmak istiyorum (Kültürel, Lezzet, Deniz, Doğa)")
+    islem = input("\nSeçiminizi yapın (1, 2): ")
+
+    # -------------------------------------------------------------------------------------------------------------
+
+    if islem == '1':
+        print("\nSeçtiniz: Tatil yapmak istediğim şehri ben seçmek istiyorum.")
+        # Bu seçeneğe göre yapılacak işlemler burada tanımlanacak.
+        tofrom = input("Sırasıyla çıkmak ve gitmek istediğiniz illeri arada boşluk karakteri kullanarak giriniz: ")
+        tofromx = tofrom.split()
+        from_city = tofromx[0]
+        to_city = tofromx[1]
+        nesne_ulasim = Ulasim(from_city, to_city)
+        nesne_otel = Otel(to_city)
+
+        ulasim_tercih = input("Otobüsle yolculuk yapmak istiyorsanız 'o' uçakla yolculuk yapmak istiyorsanız 'u' tuşlayınız: ")
+        if ulasim_tercih == "o":
+            # invoke otobus
+            bilet_fiyati = nesne_ulasim.otobus()
+        elif ulasim_tercih == "u":
+            # invoke ucak
+            bilet_fiyati = nesne_ulasim.ucak()
+        print(f"Bilet Fiyatı: {bilet_fiyati}\n")
+        # otel vs
+        otel_fiyati = nesne_otel.hotels()
+        hizmet = kampanya(to_city)   
+
+    # --------------------------------------------------------------------------------------------------
+
+    elif islem == '2':
+        print("\nSeçtiniz: Bir kategoriye göre tatil yapmak istiyorum")
+        # Bu seçeneğe göre yapılacak işlemler burada tanımlanacak.
+        print("Lütfen seyahat türünüzü seçin:")
+        print("1. Deniz Tatili")
+        print("2. Lezzet Turu")
+        print("3. Kültürel Gezi")
+        print("4. Doğa Tatili")
+
+        secim = input("Seçiminizi girin (1-4): ")
+
         with open('cities_of_turkey.json', 'r', encoding='utf-8') as file:
             veri = json.load(file)
+        list_deniz = []
+        list_lezzet = []
+        list_kultur = []
+        list_doga = []
 
-        sehirler_listesi = []
-        for data in veri:
-            sehirler_listesi.append(data["name"])
+        for i in veri:
+            if i["kategori"] == "Deniz":
+                list_deniz.append(i["name"])
+            elif i["kategori"] == "Lezzet":
+                list_lezzet.append(i["name"])
+            elif i["kategori"] == "Kültürel":
+                list_kultur.append(i["name"])
+            elif i["kategori"] == "Doğa":
+                list_doga.append(i["name"])
+            else:
+                print("Geçersiz seçim! Lütfen tekrar deneyin.")
 
-        rastgele_sehirler = random.sample(sehirler_listesi, 15)
-        # print(f"Rastgele belirlenen şehirler: {', '.join(rastgele_sehirler)}")
-
-        # Kullanıcıdan şehir girmesini iste!!!
-        kullanici_sehri = "Adana"
-
-        # Kullanıcı şehri rastgele belirlenen şehirler arasında mı kontrol et
-        if kullanici_sehri in rastgele_sehirler:
-            print(f"{kullanici_sehri} seçildiği için %15 indirim uygulanacak!")
-            indirimli_fiyat = hizmet_bedeli * 0.85
-            # print(f"İndirimli toplam fiyat: {indirimli_fiyat:.2f} TL")
-            return indirimli_fiyat
+        if secim == '1':
+            kategori = "Deniz"
+            randoms = random.sample(list_deniz, min(5, len(list_deniz)))  # Ensure max sample size is limited by list size
+        elif secim == '2':
+            kategori = "Lezzet"
+            randoms = random.sample(list_lezzet, min(5, len(list_lezzet)))
+        elif secim == '3':
+            kategori = "Kültürel"
+            randoms = random.sample(list_kultur, min(5, len(list_kultur)))
+        elif secim == '4':
+            kategori = "Doğa"
+            randoms = random.sample(list_doga, min(5, len(list_doga)))
         else:
-            print(f"{kullanici_sehri} kampanyalı şehirler arasında değil, indirim uygulanmayacak.")
-            return hizmet_bedeli
-    return kampanya()
-# ------------------------------------------------------------------------------------------------------
-        
-ad_soyad = input("Adınız Soyadınız: ")
-# Kullanıcıyı karşılama mesajı
-print(f"\nMerhaba {ad_soyad}, PathFinders'a hoş geldiniz!")
-print(f"Size uygun tatil önerileri sunacağız.\n")
+            print("Geçersiz seçim! Lütfen tekrar deneyin.")
+            break
 
-num_person = int(input("Katılacak kişi sayısını giriniz: "))
-num_day = int(input("Kalınacak gece sayısını giriniz: "))
-rehber = input("Rehber hizmeti istiyorsanız 'e' istemiyorsanız 'h' tuşlayınız: ")
+        print(f"{kategori} kategorisi için size önerdiğimiz seçenekleri aşağıda ulaşabilirsiniz.\n")
+        for x in randoms:
+            print(x)
+        sehir_secim = input("Lütfen sizlere sunduğumuz seçenekler arasından tercih yapınız: ")
+        sehir_secim = sehir_secim.capitalize()
+        if sehir_secim == "Istanbul":
+            sehir_secim = sehir_secim.replace("I", "İ")
+        elif sehir_secim == "Istanbul":
+            sehir_secim = sehir_secim.replace("I", "İ")
+        elif sehir_secim == "Izmir":
+            sehir_secim = sehir_secim.replace("I", "İ")
+        elif sehir_secim == "Izmir":
+            sehir_secim = sehir_secim.replace("I", "İ")
 
-if rehber == "e":
-    rehber_fiyat = 500
-else:
-    rehber_fiyat = 0
-# İşlem türü seçimi
-print("Lütfen yapmak istediğiniz işlemi seçin:")
-print("1) Tatil yapmak istediğim şehri ben seçmek istiyorum.")
-print("2) Bir kategoriye göre tatil yapmak istiyorum (Kültürel, Lezzet, Deniz, Doğa)")
-islem = input("\nSeçiminizi yapın (1, 2): ")
+        cikis_sehir = input("Lütfen çıkış yapacağınız ili giriniz: ")
+        cikis_sehir = cikis_sehir.capitalize()
+        if cikis_sehir == "Istanbul":
+            cikis_sehir = cikis_sehir.replace("I", "İ")
+        elif cikis_sehir == "Istanbul":
+            cikis_sehir = cikis_sehir.replace("I", "İ")
+        elif cikis_sehir == "Izmir":
+            cikis_sehir = cikis_sehir.replace("I", "İ")
+        elif cikis_sehir == "Izmir":
+            cikis_sehir = cikis_sehir.replace("I", "İ")
 
-# -------------------------------------------------------------------------------------------------------------
+        nesne_ulasim = Ulasim(cikis_sehir, sehir_secim)
+        ulasim_tercih = input("Otobüsle yolculuk yapmak istiyorsanız 'o' uçakla yolculuk yapmak istiyorsanız 'u' tuşlayınız: ")
+        if ulasim_tercih == "o":
+            # invoke otobus
+            bilet_fiyati = nesne_ulasim.otobus()
+        elif ulasim_tercih == "u":
+            # invoke ucak
+            bilet_fiyati = nesne_ulasim.ucak()
+        print(f"Bilet Fiyatı: {bilet_fiyati}\n")
 
-if islem == '1':
-    print("\nSeçtiniz: Tatil yapmak istediğim şehri ben seçmek istiyorum.")
-    # Bu seçeneğe göre yapılacak işlemler burada tanımlanacak.
-    tofrom = input("Sırasıyla çıkmak ve gitmek istediğiniz illeri arada boşluk karakteri kullanarak giriniz: ")
-    tofromx = tofrom.split()
-    to_city = tofromx[0]
-    from_city = tofromx[1]
-    deneme1 = Ulasim(from_city, to_city)
-    ulasim_tercih = input("Otobüsle yolculuk yapmak istiyorsanız 'o' uçakla yolculuk yapmak istiyorsanız 'u' tuşlayınız: ")
-    if ulasim_tercih == "o":
-        # invoke otobus
-        bilet_fiyati = deneme1.otobus()
-    elif ulasim_tercih == "u":
-        # invoke ucak
-        bilet_fiyati = deneme1.ucak()
-    print(f"Bilet Fiyatı: {bilet_fiyati}")
-    # otel vs    
+        nesne_otel = Otel(sehir_secim)
+        otel_fiyati = nesne_otel.hotels()
+        hizmet = kampanya(sehir_secim)
 
-elif islem == '2':
-    print("\nSeçtiniz: Bir kategoriye göre tatil yapmak istiyorum")
-    # Bu seçeneğe göre yapılacak işlemler burada tanımlanacak.
-    print("Lütfen seyahat türünüzü seçin:")
-    print("1. Deniz Tatili")
-    print("2. Lezzet Turu")
-    print("3. Kültürel Gezi")
-    print("4. Doğa")
-
-    secim = input("Seçiminizi girin (1-4): ")
-
-    if secim == '1':
-        pass
-    elif secim == '2':
-        pass
-    elif secim == '3':
-        pass
-    elif secim == '4':
-        pass
     else:
-        print("Geçersiz seçim! Lütfen tekrar deneyin.")
+        print("\nGeçersiz seçim. Lütfen tekrar deneyin.")
+        break
 
-else:
-    print("\nGeçersiz seçim. Lütfen tekrar deneyin.")
+    # ------------------------------------------------------------------------------------------------------------
+    # Toplam tutar tatil planları kodu yazıldıktan sonra oradan çekilebilir.
+    toplam_tutar = int((bilet_fiyati * num_person) + hizmet + rehber_fiyat + (otel_fiyati * num_day * num_person))
 
-# ------------------------------------------------------------------------------------------------------------
+    if toplam_tutar > max_butce:
+        print(f"Seçimlerinizin toplam fiyatı max bütçenizden {toplam_tutar - max_butce} TL kadar fazladır!")
+        tercih = input("İşlemi onaylayıp ödeme kısmına geçmek istiyorsanız lütfen 'e' tuşlayınız, diğer seçimlerinizde işleminiz sonlandırılacaktır! ")
 
-# Kullanıcıya ödeme seçeneklerini sunma
-print("Lütfen ödeme yöntemini seçin:")
-print("1) Kredi Kartı (%2 komisyonlu)")
-print("2) Banka Kartı")
-print("3) Nakit Ödeme")
-print("4) Havale ile Ödeme (%5 indirimli)")
+        if tercih != "e":
+            print("İşleminiz sonlandırılıyor.")
+            break
 
-# Ödeme türü seçimi
-odeme = input("\nSeçiminizi yapın (1, 2, 3 veya 4): ")
+    # Kullanıcıya ödeme seçeneklerini sunma
+    print("Lütfen ödeme yöntemini seçin:")
+    print("1) Kredi Kartı (%2 komisyonlu)")
+    print("2) Banka Kartı")
+    print("3) Nakit Ödeme")
+    print("4) Havale ile Ödeme (%5 indirimli)")
 
-# Toplam tutar tatil planları kodu yazıldıktan sonra oradan çekilebilir.
-toplam_tutar = (bilet_fiyati * num_person) + int(odeme_yap()) + rehber_fiyat  # + otel 
+    # Ödeme türü seçimi
+    odeme = input("\nSeçiminizi yapın (1, 2, 3 veya 4): ")
 
-if odeme == '1':
-    komisyon_orani = 0.02
-    komisyonlu_tutar = toplam_tutar * (1 + komisyon_orani)
-    print(f"\nSeçtiniz: Kredi Kartı ile Ödeme")
-    print(f"Ödenecek Tutar (komisyonlu): {komisyonlu_tutar:.2f} TL")
-        
-elif odeme == '2':
-    print(f"\nSeçtiniz: Banka Kartı ile Ödeme")
-    print(f"Ödenecek Tutar: {toplam_tutar:.2f} TL")
-        
-elif odeme == '3':
-    print(f"\nSeçtiniz: Nakit Ödeme")
-    print(f"Ödenecek Tutar: {toplam_tutar:.2f} TL")
-        
-elif odeme == '4':
-    indirimli_tutar = toplam_tutar * 0.95
-    print(f"\nSeçtiniz: Havale ile Ödeme")
-    print(f"Ödenecek Tutar (indirimli): {indirimli_tutar:.2f} TL")
-        
-else:
-    print("\nGeçersiz seçim. Lütfen tekrar deneyin.")
+    if odeme == '1':
+        komisyon_orani = 0.02
+        komisyonlu_tutar = toplam_tutar * (1 + komisyon_orani)
+        print(f"\nSeçtiniz: Kredi Kartı ile Ödeme")
+        print(f"Ödenecek Tutar (komisyonlu): {komisyonlu_tutar:.2f} TL")
+        break
+            
+    elif odeme == '2':
+        print(f"\nSeçtiniz: Banka Kartı ile Ödeme")
+        print(f"Ödenecek Tutar: {toplam_tutar:.2f} TL")
+        break
+            
+    elif odeme == '3':
+        print(f"\nSeçtiniz: Nakit Ödeme")
+        print(f"Ödenecek Tutar: {toplam_tutar:.2f} TL")
+        break
+            
+    elif odeme == '4':
+        indirimli_tutar = toplam_tutar * 0.95
+        print(f"\nSeçtiniz: Havale ile Ödeme")
+        print(f"Ödenecek Tutar (indirimli): {indirimli_tutar:.2f} TL")
+        break
+            
+    else:
+        print("\nGeçersiz seçim. Lütfen tekrar deneyin.")
+        break
 

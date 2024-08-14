@@ -17,4 +17,8 @@ elif ulasim_tercih == "u":
     # invoke ucak
     pass
 
+butce = 1000
 max_butce = float(input("Tatil için ayırabileceğiniz max bütçe miktarını giriniz: "))
+
+if butce > max_butce:
+    print(f"Aştın!", butce - max_butce , "lira emin misin?")
