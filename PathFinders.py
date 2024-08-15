@@ -14,7 +14,6 @@ class Ulasim:
         self.from_city = from_city
         self.to_city = to_city
 
-    # @staticmethod
     def distance(self):
         # JSON dosyasından verileri çekme
         with open('cities_of_turkey.json', 'r', encoding='utf-8') as file:
@@ -45,10 +44,10 @@ class Ulasim:
             if not found:
                 print(f"{sehir} adlı şehir veri setinde bulunamadı.")
         
-        if len(lats) >= 2 and len(longs) >= 2:        # Listede en az iki şehir olduğunu kontrol etmek için
+        if len(lats) >= 2 and len(longs) >= 2:   # Listede en az iki şehir olduğunu kontrol etmek için
             coord1 = (lats[0], longs[0])
             coord2 = (lats[1], longs[1])
-            return int(geodesic(coord1, coord2).kilometers)    # Geodesic kütüphanesi iki koordinat arası mesafeyi hesaplar
+            return int(geodesic(coord1, coord2).kilometers) # Geodesic kütüphanesi iki koordinat arası mesafeyi hesaplar
         else:
             return "İki şehir arasında mesafe hesaplanamadı."
 
@@ -59,7 +58,7 @@ class Ulasim:
         koltuk_sayisi = 40
 
         def personel_ucreti():
-            sofor = distance * 1.5 * 2     # 2 sofor var, km başı 1.5 tl
+            sofor = distance * 1.5 * 2 # 2 sofor var, km başı 1.5 tl
             gorevli = distance * 1
             return sofor + gorevli
 
@@ -69,7 +68,7 @@ class Ulasim:
             return ikram_maliyeti + servis_maliyeti
 
         def otogar_masrafi():
-            durulan_otogar_sayisi = math.floor(distance / 150)     # 150 kmde bir otogarda duruyor ve her durduğu otogarda 450 harcıyor
+            durulan_otogar_sayisi = math.floor(distance / 150) # 150 kmde bir otogarda duruyor ve her durduğu otogarda 450 harcıyor
             return durulan_otogar_sayisi * 450
 
         def bakimlar():
@@ -82,13 +81,13 @@ class Ulasim:
             sefer_basi_bakim_masrafi = km_basina_bakim_masraflari * distance
             return sefer_basi_bakim_masrafi
 
-        def yakit_masrafi():       # Mazot fiyatları sürekli güncellendiği için seleniumdan xpath kullanarak veriyi aldık
+        def yakit_masrafi(): # Mazot fiyatları sürekli güncellendiği için seleniumdan xpath kullanarak veriyi aldık
             chromeOptions = Options()
             chromeOptions.add_argument("--incognito")
             chromeOptions.add_argument("--headless")
             driver = webdriver.Chrome(options=chromeOptions)
             driver.get("https://www.aytemiz.com.tr/akaryakit-fiyatlari/motorin-fiyatlari")
-            driver.implicitly_wait(5)     # sitenin açılması için bekleme süresi
+            driver.implicitly_wait(5) # sitenin açılması için bekleme süresi
 
             try:
                 fiyat_bilgisi = driver.find_element("xpath", '//*[@id="fuel-price-table"]/tbody/tr[6]/td[3]').text
@@ -101,7 +100,7 @@ class Ulasim:
             driver.quit()  
 
         def diger_masraflar():
-            mtv = 13500     # motorlu taşıtlar vergisi 
+            mtv = 13500   # motorlu taşıtlar vergisi 
             aylik_kasko = 120000
             yilda_gidilen_km = 330000
             km_basina_kasko = (aylik_kasko * 12 ) / yilda_gidilen_km
@@ -109,13 +108,13 @@ class Ulasim:
             return sefer_basina_kasko_mtv
         
         toplam_masraf = personel_ucreti() + ikram_servis() + otogar_masrafi() + bakimlar() + yakit_masrafi() + diger_masraflar()
-        amortisman = toplam_masraf     # kaarda amortisman içinde
+        amortisman = toplam_masraf    
         return int((toplam_masraf + amortisman) / koltuk_sayisi)
     
 # --------------------------------------------------------------------------------------------------------------
     
     def load_cities_and_regions(self):
-        # Load cities and regions from the JSON file
+        # Jsondan şehir ve bölge yükleme
         with open('cities_of_turkey.json', 'r', encoding='utf-8') as file:
             veri = json.load(file)
         
@@ -127,7 +126,7 @@ class Ulasim:
         with open('cities_of_turkey.json', 'r', encoding='utf-8') as file:
             veri = json.load(file)
 
-        # Kullanıcının girdiği şehir isimlerini al
+        # Kullanıcının girdiği şehir isimlerini alma
         sehirler = [self.from_city.capitalize() , self.to_city.capitalize()]
         if sehirler[0] == "Istanbul":
             sehirler[0] = sehirler[0].replace("I", "İ")
@@ -138,11 +137,10 @@ class Ulasim:
         elif sehirler[1] == "Izmir":
             sehirler[1] = sehirler[1].replace("I", "İ")
 
-        # Ensure cities and regions data is loaded
+        # şehir ve bölgelerin yüklendiğinden emin olma
         if not self.sehirler or not self.sehir_regionleri:
             self.load_cities_and_regions()
 
-        # Bölgeler
         regions = {
             "Ege": "İzmir",
             "Akdeniz": "Antalya",
@@ -152,8 +150,6 @@ class Ulasim:
             "Marmara": "İstanbul",
             "Karadeniz": "Samsun"
         }
-
-        # ucak_bileti = 0
 
         for data in veri:
             if data["name"] == sehirler[0]:
@@ -244,12 +240,12 @@ class Otel:
         if self.location is None:
             print("Location is not specified.")
             return
-        # Excel dosyasının yolunu belirtin
+        # Excel dosyasının yolunu belirtme
         dosya_yolu = 'PathFinders_oteller.xlsx'
 
-        # Excel dosyasını ve sayfasını yükleyin
+        # Excel dosyasını ve sayfasını yükleme
         kitap = openpyxl.load_workbook(dosya_yolu)
-        sayfa = kitap.active  # Aktif sayfa seçili hale gelir
+        sayfa = kitap.active  # Aktif sayfa seçili hale getirme
 
         self.location = self.location.capitalize()
         if self.location == "Istanbul":
@@ -257,37 +253,36 @@ class Otel:
         elif self.location == "Izmir":
             self.location = self.location.replace("I", "İ")
 
-        # Şehir için uygun otelleri ve fiyatlarını depolamak için liste oluşturun
+        # Şehir için uygun otelleri ve fiyatlarını depolamak için liste oluşturma
         oteller = []
 
-        # Satır sayısını belirleyin
+        # Satır sayısını belirleme
         satir_sayisi = sayfa.max_row
 
-        # Verileri çekmek için bir döngü yazın
-        for i in range(2, satir_sayisi + 1):  # Satırlar arasında döngü (başlık satırı atlanarak)
-            sehir = sayfa.cell(i, 2).value  # 2. sütundaki şehir ismini al
+        # Verileri çekmek için bir döngü
+        for i in range(2, satir_sayisi + 1):  # Satırlar arasında döngü (başlık atlanıyor)
+            sehir = sayfa.cell(i, 2).value  # 2. sütundaki şehir ismini alma
             
-            # Şehir eşleşiyorsa otelleri al
+            # Şehir eşleşiyorsa otelleri çekme
             if sehir.lower() == self.location.lower():
                 for j in range(3, 6):  # 3. sütundan 5. sütuna kadar oteller
-                    otel = sayfa.cell(i, j).value  # Otel ismini al
-                    fiyat = sayfa.cell(i, j + 3).value  # Aynı otelin fiyatını al (3 sütun sonrası)
+                    otel = sayfa.cell(i, j).value  # Otel ismini alma
+                    fiyat = sayfa.cell(i, j + 3).value  # Aynı otelin fiyatını alma (3 sütun sonrası)
                     
-                    # Otel ve fiyatı listeye ekle
+                    # Otel ve fiyatı listeye ekleme
                     oteller.append((otel, fiyat))
                 
-                # Kamp alanı ve fiyatını al
-                kamp_alani = sayfa.cell(i, 9).value  # 9. sütundaki kamp alanı ismini al
-                kamp_fiyati = sayfa.cell(i, 10).value  # 10. sütundaki kamp fiyatını al
+                # Kamp alanı ve fiyatını alma
+                kamp_alani = sayfa.cell(i, 9).value  # 9. sütun kamp ismi
+                kamp_fiyati = sayfa.cell(i, 10).value  # 10. sütun kamp fiyatı
                 
                 # Kamp alanını da listeye ekle
-                oteller.append((kamp_alani, kamp_fiyati))  # Kamp alanları için adres ve telefon yoksa boş bırakın
+                oteller.append((kamp_alani, kamp_fiyati))  
             
             # İlgili şehir için 3 otel ve 1 kamp alanı bulduysak döngüden çık
             if len(oteller) >= 4:
                 break
 
-        # Şehir için otel ve kamp seçenekleri bulunduğunda sonucu yazdır
         if oteller:
             print(f"{self.location} için mevcut otel ve kamp seçenekleri:")
             for idx, (otel, fiyat) in enumerate(oteller[:4], start=1):  # İlk 3 otel ve 1 kamp alanını yazdır
@@ -299,8 +294,7 @@ class Otel:
                     secim = int(input("Hangi oteli/kampı seçmek istersiniz (1-4): "))
                     if 1 <= secim <= len(oteller[:4]):
                         secili_otel, secili_fiyat = oteller[secim - 1]
-                        # secili_fiyat değerini sayıya dönüştürün
-                        secili_fiyat = float(secili_fiyat)  # Eğer fiyatlar tamsayı ise int() kullanın
+                        secili_fiyat = float(secili_fiyat) 
                         print(f"Seçtiğiniz Otel/kamp: {secili_otel} \nFiyat: {secili_fiyat} TL")
                         
                         return secili_fiyat
@@ -324,9 +318,8 @@ def kampanya(location):
         sehirler_listesi.append(data["name"])
 
     rastgele_sehirler = random.sample(sehirler_listesi, 15)
-    # print(f"Rastgele belirlenen şehirler: {', '.join(rastgele_sehirler)}")
 
-    # Kullanıcı şehri rastgele belirlenen şehirler arasında mı kontrol et
+    # Kullanıcı şehri rastgele belirlenen şehirler arasında mı kontrol etme
     if location in rastgele_sehirler:
         print(f"{location} seçildiği için %15 indirim uygulanacak!")
         indirimli_fiyat = hizmet_bedeli * 0.85
@@ -368,7 +361,6 @@ while True:
 
     if islem == '1':
         print("\nSeçtiniz: Tatil yapmak istediğim şehri ben seçmek istiyorum.")
-        # Bu seçeneğe göre yapılacak işlemler burada tanımlanacak.
         tofrom = input("Sırasıyla çıkmak ve gitmek istediğiniz illeri arada boşluk karakteri kullanarak giriniz: ")
         tofromx = tofrom.split()
         from_city = tofromx[0]
@@ -386,7 +378,6 @@ while True:
         else:
             print("Lütfen 'o' veya 'u' seçeneğini seçiniz. ")
         print(f"Bilet Fiyatı: {bilet_fiyati}\n")
-        # otel vs
         otel_fiyati = nesne_otel.hotels()
         hizmet = kampanya(to_city)   
 
@@ -394,7 +385,6 @@ while True:
 
     elif islem == '2':
         print("\nSeçtiniz: Bir kategoriye göre tatil yapmak istiyorum")
-        # Bu seçeneğe göre yapılacak işlemler burada tanımlanacak.
         print("Lütfen seyahat türünüzü seçin:")
         print("1. Deniz Tatili")
         print("2. Lezzet Turu")
@@ -424,7 +414,7 @@ while True:
 
         if secim == '1':
             kategori = "Deniz"
-            randoms = random.sample(list_deniz, min(5, len(list_deniz)))  # Ensure max sample size is limited by list size
+            randoms = random.sample(list_deniz, min(5, len(list_deniz)))  
         elif secim == '2':
             kategori = "Lezzet"
             randoms = random.sample(list_lezzet, min(5, len(list_lezzet)))
@@ -482,7 +472,6 @@ while True:
         break
 
     # ------------------------------------------------------------------------------------------------------------
-    # Toplam tutar tatil planları kodu yazıldıktan sonra oradan çekilebilir.
     toplam_tutar = int((bilet_fiyati * num_person) + hizmet + rehber_fiyat + (otel_fiyati * num_day * num_person))
 
     if toplam_tutar > max_butce:
