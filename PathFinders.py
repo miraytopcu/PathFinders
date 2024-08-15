@@ -339,9 +339,10 @@ def kampanya(location):
 # ------------------------------------------------------------------------------------------------------
 
 while True:        
-    ad_soyad = input("Adınız Soyadınız: ")
+    ad = input("Adınız: ")
+    soyad = input("Soyadınız: ")
     # Kullanıcıyı karşılama mesajı
-    print(f"\nMerhaba {ad_soyad}, PathFinders'a hoş geldiniz!")
+    print(f"\nMerhaba {ad.capitalize()} {soyad.capitalize()}, PathFinders'a hoş geldiniz!")
     print(f"Size uygun tatil önerileri sunacağız.\n")
     try:
         num_person = int(input("Katılacak kişi sayısını giriniz: "))
