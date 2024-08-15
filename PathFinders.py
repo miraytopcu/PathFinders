@@ -343,16 +343,20 @@ while True:
     # Kullanıcıyı karşılama mesajı
     print(f"\nMerhaba {ad_soyad}, PathFinders'a hoş geldiniz!")
     print(f"Size uygun tatil önerileri sunacağız.\n")
-
-    num_person = int(input("Katılacak kişi sayısını giriniz: "))
-    num_day = int(input("Kalınacak gece sayısını giriniz: "))
-    max_butce = float(input("Tatil için ayırabileceğiniz max bütçeyi giriniz: "))
+    try:
+        num_person = int(input("Katılacak kişi sayısını giriniz: "))
+        num_day = int(input("Kalınacak gece sayısını giriniz: "))
+        max_butce = float(input("Tatil için ayırabileceğiniz max bütçeyi giriniz: "))
+    except ValueError:
+        print("Lütfen rakamla giriniz")
     rehber = input("Rehber hizmeti istiyorsanız 'e' istemiyorsanız 'h' tuşlayınız: ")
 
     if rehber == "e":
         rehber_fiyat = 500
-    else:
+    elif rehber == "h":
         rehber_fiyat = 0
+    else:
+        print("Lütfen seçeneklerden birini giriniz. ")
     # İşlem türü seçimi
     print("Lütfen yapmak istediğiniz işlemi seçin:")
     print("1) Tatil yapmak istediğim şehri ben seçmek istiyorum.")
@@ -378,6 +382,8 @@ while True:
         elif ulasim_tercih == "u":
             # invoke ucak
             bilet_fiyati = nesne_ulasim.ucak()
+        else:
+            print("Lütfen 'o' veya 'u' seçeneğini seçiniz. ")
         print(f"Bilet Fiyatı: {bilet_fiyati}\n")
         # otel vs
         otel_fiyati = nesne_otel.hotels()
